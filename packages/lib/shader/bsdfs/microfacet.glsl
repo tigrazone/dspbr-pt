@@ -86,28 +86,24 @@ float ggx_eval_vndf(vec2 alpha, vec3 wi, vec3 wh, Geometry g) {
   return g1 * abs(dot(wi, wh)) * d / abs(dot(wi, g.n));
 }
 
-// Eric Heitz. A Simpler and Exact Sampling Routine for the GGX Distribution
-// of Visible Normals. [Research Report] Unity Technologies. 2017.
-// https://hal.archives-ouvertes.fr/hal-01509746/document
+// Kenta Eto and Yusuke Tokuyoshi. 2023. Bounded VNDF Sampling for Smith–GGX Reflections.
+// In SIGGRAPH Asia 2023 Technical Communications (SA Technical Communications ’23), December 12–15, 2023, Sydney, NSW, Australia. ACM, New York, NY, USA, 4 pages.
+// https://doi.org/10.1145/3610543.3626163
 vec3 ggx_sample_vndf(vec2 alpha, vec3 wi_, vec2 uv) {
-  // stretch view
-  vec3 wi = normalize(vec3(alpha.x * wi_.x, alpha.y * wi_.y, wi_.z));
-  // orthonormal basis
-  vec3 t1 = (wi.z < 0.9999) ? normalize(cross(wi, vec3(0, 1, 0))) : vec3(1, 0, 0);
-  vec3 t2 = cross(t1, wi);
-  // sample point with polar coordinates (r, phi)
-  float a = 1.0 / (1.0 + wi.z);
-  float r = sqrt(uv.x);
-  float phi = (uv.y < a) ? uv.y / a * PI : PI + (uv.y - a) / (1.0 - a) * PI;
-  float p1 = r * cos(phi);
-  float p2 = r * sin(phi) * ((uv.y < a) ? 1.0 : wi.z);
-  // compute normal
-  vec3 wh = p1 * t1 + p2 * t2 + sqrt(max(0.0, 1.0 - p1 * p1 - p2 * p2)) * wi;
-  // unstretch
-  wh.x *= alpha.x;
-  wh.y *= alpha.y;
-  wh.z = max(EPS_COS, wh.z);
-  return normalize(wh);
+  vec3 wi = normalize(vec3(wi_.xy * alpha, wi_.z));
+  // Sample a spherical cap
+  float phi = TWO_PI * uv.x;
+  float a = saturate(min(alpha.x, alpha.y)); // Eq. 6
+  float s = 1.0f + length(wi_.xy); // Omit sgn for a <=1
+  float a2 = a * a; float s2 = s * s;
+  float k = (1.0f - a2) * s2 / (s2 + a2 * wi_.z * wi_.z); // Eq. 5
+  float b = wi_.z > 0.f ? k * wi.z : wi.z;
+  float z = (1.0f - uv.y) * (1.0f + b) -b;
+  float sinTheta = sqrt(saturate(1.0f - z * z));
+  vec3 o_std = vec3(sinTheta * cos(phi), sinTheta * sin(phi), z);
+  // Compute the microfacet normal m
+  vec3 m_std = wi + o_std;
+  return normalize(vec3(m_std.xy * alpha, m_std.z));
 }
 
 float directional_albedo_ggx(float alpha, float cosTheta) {
