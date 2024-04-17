@@ -34,11 +34,11 @@ float sqr(float x) {
 }
 
 float sum(vec3 v) {
-  return dot(vec3(1.0), v);
+  return v.x + v.y + v.z;
 }
 
 vec3 flip(vec3 v, vec3 n) {
-  return normalize(v - 2.0 * n * abs(dot(v, n)));
+  return normalize(v - (n + n) * abs(dot(v, n)));
 }
 
 float luminance(vec3 rgb) {
@@ -65,12 +65,11 @@ vec3 refractIt(vec3 wi, vec3 n, float inv_eta, out bool tir) {
   tir = false;
   float cosi = dot(-wi, n);
   float cost2 = 1.0 - inv_eta * inv_eta * (1.0 - cosi * cosi);
-  vec3 wo = inv_eta * wi + ((inv_eta * cosi - sqrt(abs(cost2))) * n);
   if (cost2 <= 0.0) {
     tir = true;
-    wo = reflect(wi, n);
+    return reflect(wi, n);
   }
-  return wo;
+  return inv_eta * wi + ((inv_eta * cosi - sqrt(abs(cost2))) * n);
 }
 
 // Bends shading normal n into the direction of the geometry normal ng
@@ -183,9 +182,7 @@ vec3 sampleHemisphereUniform(vec2 uv, out float pdf) {
   }
 
 vec3 compute_triangle_normal(in vec3 p0, in vec3 p1, in vec3 p2) {
-  vec3 e0 = p2 - p0;
-  vec3 e1 = p1 - p0;
-  return normalize(cross(e1, e0));
+  return normalize(cross(p1 - p0, p2 - p0));
 }
 
 float max_(vec3 v) {
@@ -215,7 +212,7 @@ int lower_bound(sampler2D data, int row, int size, float value)
   while (count > 0)
   {
     idx = first;
-    step = count / 2;
+    step = count >> 1;
     idx += step;
     float v = texelFetch(data, ivec2(idx, row), 0).x;
     if (v < value)
