@@ -113,21 +113,16 @@ void select_bsdf(inout MaterialClosure c, float rr, vec3 wi, out float pdf) {
   bsdf_cdf[3] = bsdf_cdf[2] + bsdf_pdf[3];
   bsdf_cdf[4] = bsdf_cdf[3] + bsdf_pdf[4];
 
-  if (bsdf_cdf[4] != 0.0) {
-    bsdf_cdf[0] *= 1.0 / bsdf_cdf[4];
-    bsdf_cdf[1] *= 1.0 / bsdf_cdf[4];
-    bsdf_cdf[2] *= 1.0 / bsdf_cdf[4];
-    bsdf_cdf[3] *= 1.0 / bsdf_cdf[4];
-    bsdf_cdf[4] *= 1.0 / bsdf_cdf[4];
+  if (bsdf_cdf[4] > 0.0) {
+    float bsdf_cdf4_ = 1.0 / bsdf_cdf[4];
+    bsdf_cdf[0] *= bsdf_cdf4_;
+    bsdf_cdf[1] *= bsdf_cdf4_;
+    bsdf_cdf[2] *= bsdf_cdf4_;
+    bsdf_cdf[3] *= bsdf_cdf4_;
+    bsdf_cdf[4] *= bsdf_cdf4_;
   } else {
     bsdf_cdf[0] = 1.0;
   }
-
-  // bsdf_cdf[0] = 1.0;
-  // bsdf_cdf[1] = 0.0;
-  // bsdf_cdf[2] = 0.0;
-  // bsdf_cdf[3] = 0.0;
-  // bsdf_cdf[4] = 0.0;
 
   pdf = 0.0;
   vec3 wo;
@@ -151,8 +146,6 @@ void select_bsdf(inout MaterialClosure c, float rr, vec3 wi, out float pdf) {
     c.event_type = E_COATING;
     pdf = bsdf_cdf[4] - bsdf_cdf[3];
   }
-
-  // pdf = 1.0;
 }
 
 vec3 sample_dspbr(inout MaterialClosure c, vec3 wi, in vec3 uvw, inout vec3 bsdf_over_pdf, out float pdf) {

@@ -8,7 +8,7 @@ vec4 trace(bvh_ray r)
     if (u_background_from_ibl > 0.0)
       return vec4(ibl_eval(r.dir) * path_weight, 1.0);
     else
-      return vec4(pow(u_background_color.xyz, vec3(2.2)), u_background_color.w);
+      return vec4(to_linear_rgb(u_background_color.xyz), u_background_color.w);
   }
 
   RenderState rs;

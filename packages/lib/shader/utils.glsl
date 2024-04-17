@@ -155,16 +155,16 @@ vec3 fromThetaPhi(float theta, float phi) {
 
 vec2 dir_to_uv(vec3 dir, out float pdf) {
   float theta = computeTheta(dir);
-  float u = computePhi(dir) / TWO_PI;
-  float v = theta / PI;
-  pdf = 1.0 / (2.0 * PI * PI * max(EPS_COS, sin(theta)));
+  float u = computePhi(dir) * ONE_OVER_TWO_PI;
+  float v = theta * ONE_OVER_PI;
+  pdf = 1.0 / (TWO_PI * PI * max(EPS_COS, sin(theta)));
   return vec2(u, v);
 }
 
 vec3 uv_to_dir(vec2 uv, out float pdf) {
   float theta = uv.y * PI;
   float phi = uv.x * TWO_PI;
-  pdf = 1.0 / (2.0 * PI * PI * max(EPS_COS, sin(theta)));
+  pdf = 1.0 / (TWO_PI * PI * max(EPS_COS, sin(theta)));
   return fromThetaPhi(theta, phi);
 }
 
@@ -231,7 +231,8 @@ int lower_bound(sampler2D data, int row, int size, float value)
   return first;
 }
 
-
 float mis_balance_heuristic(float a, float b) {
 	return a / (a + b);
 }
+
+float pow5(float x) { return x*x*x*x*x; }

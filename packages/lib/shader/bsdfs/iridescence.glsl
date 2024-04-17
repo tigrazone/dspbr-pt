@@ -38,13 +38,13 @@ float IorToFresnel0(float transmittedIor, float incidentIor) {
 // Ref: https://belcour.github.io/blog/research/2017/05/01/brdf-thin-film.html
 // Evaluation XYZ sensitivity curves in Fourier space
 vec3 evalSensitivity(float OPD, vec3 shift) {
-    float phase = 2.0 * PI * OPD * 1.0e-9;
+    float phase = TWO_PI * OPD * 1.0e-9;
     vec3 val = vec3(5.4856e-13, 4.4201e-13, 5.2481e-13);
     vec3 pos = vec3(1.6810e+06, 1.7953e+06, 2.2084e+06);
     vec3 var = vec3(4.3278e+09, 9.3046e+09, 6.6121e+09);
 
-    vec3 xyz = val * sqrt(2.0 * PI * var) * cos(pos * phase + shift) * exp(-sq(phase) * var);
-    xyz.x += 9.7470e-14 * sqrt(2.0 * PI * 4.5282e+09) * cos(2.2399e+06 * phase + shift[0]) * exp(-4.5282e+09 * sq(phase));
+    vec3 xyz = val * sqrt(TWO_PI * var) * cos(pos * phase + shift) * exp(-sq(phase) * var);
+    xyz.x += 9.7470e-14 * sqrt(TWO_PI * 4.5282e+09) * cos(2.2399e+06 * phase + shift[0]) * exp(-4.5282e+09 * sq(phase));
     xyz /= 1.0685e-7;
 
     vec3 srgb = XYZ_TO_REC709 * xyz;

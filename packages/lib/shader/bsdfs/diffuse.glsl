@@ -1,7 +1,7 @@
 
 float ggx_directional_albedo_ms(float theta, vec2 alpha, float e0) {
-  return mix(e0 + (1.0 - e0) * pow(abs(1.0 - theta), 5.0), 0.04762 + 0.95238 * e0,
-             1.0 - pow(abs(1.0 - alpha.x * alpha.y), 5.0));
+  return mix(e0 + (1.0 - e0) * pow5(abs(1.0 - theta)), 0.04762 + 0.95238 * e0,
+             1.0 - pow5(abs(1.0 - alpha.x * alpha.y)));
 }
 
 float ggx_average_albedo_ms(vec2 alpha, float e0) {

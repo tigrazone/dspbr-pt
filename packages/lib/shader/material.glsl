@@ -74,7 +74,7 @@ void configure_material(const in uint matIdx, in RenderState rs, out MaterialClo
   c.alpha = roughness_conversion(roughness, matData.anisotropy * anisotropy);
 
   vec4 specularColor = get_texture_value(matData.specularColorTextureId, rs.uv0);
-  c.specular_tint = matData.specularTint * pow(specularColor.rgb, vec3(2.2));
+  c.specular_tint = matData.specularTint * to_linear_rgb(specularColor.rgb);
   vec4 specular = get_texture_value(matData.specularTextureId, rs.uv0);
   c.specular = matData.specular * specular.a;
 
