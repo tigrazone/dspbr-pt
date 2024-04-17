@@ -5,11 +5,10 @@
 // Roughness projected onto the outgoing direction - eq. 80
 float projected_roughness(vec2 alpha, vec3 w, Geometry g) {
   float sin_theta_2 = 1.0 - sqr(dot(w, g.n));
-  float inv_sin_theta_2 = 1.0 / sin_theta_2;
-  float cos_phi_2 = sqr(dot(w, g.t)) * inv_sin_theta_2;
-  float sin_phi_2 = sqr(dot(w, g.b)) * inv_sin_theta_2;
+  float cos_phi_2 = sqr(dot(w, g.t));
+  float sin_phi_2 = sqr(dot(w, g.b));
 
-  return sqrt(cos_phi_2 * sqr(alpha.x) + sin_phi_2 * sqr(alpha.y));
+  return sqrt((cos_phi_2 * sqr(alpha.x) + sin_phi_2 * sqr(alpha.y)) / sin_theta_2);
 }
 
 // eq. 86
@@ -23,9 +22,8 @@ float ggx_smith_lambda(vec2 alpha, vec3 w, Geometry g) {
   float alpha_w = projected_roughness(alpha, w, g);
 
   float tan_theta = sqrt(sin_theta_2) / abs(dot(w, g.n));
-  float a = 1.0 / (alpha_w * tan_theta);
 
-  return 0.5 * (-1.0 + sqrt(1.0 + 1.0 / sqr(a)));
+  return 0.5 * (sqrt(1.0 + alpha_w * tan_theta * alpha_w * tan_theta) - 1.0);
 }
 
 // Generalized form of the Smith masking function eq. 43
@@ -70,12 +68,11 @@ float ggx_eval(vec2 alpha, vec3 wh, Geometry g) {
     return 1.0 / (PI * alpha.x * alpha.y * cos_theta_4);
   }
 
-  float inv_sin_theta_2 = 1.0 / sin_theta_2;
-  float cos_phi_2 = sqr(dot(wh, g.t)) * inv_sin_theta_2;
-  float sin_phi_2 = sqr(dot(wh, g.b)) * inv_sin_theta_2;
+  float cos_phi_2 = sqr(dot(wh, g.t));
+  float sin_phi_2 = sqr(dot(wh, g.b));
 
   return 1.0 / (PI * alpha.x * alpha.y * cos_theta_4 *
-                sqr(1.0 + tan_theta_2 * (cos_phi_2 / sqr(alpha.x) + sin_phi_2 / sqr(alpha.y))));
+                sqr(1.0 + tan_theta_2 * (cos_phi_2 / sqr(alpha.x) + sin_phi_2 / sqr(alpha.y)) / sin_theta_2));
 }
 
 // GGX distribution of visible normals, eq. 16
@@ -117,7 +114,7 @@ float average_albedo_ggx(float alpha) {
 }
 
 vec3 average_fresnel(vec3 f0, vec3 f90) {
-  return 20. / 21. * f0 + 1. / 21. * f90;
+  return 0.95238095238095238095238095238095 * f0 + 0.04761904761904761904761904761905 * f90;
 }
 
 vec3 eval_brdf_microfacet_ggx_ms(vec3 f0, vec3 f90, vec2 alpha_uv, vec3 wi, vec3 wo, Geometry g) {

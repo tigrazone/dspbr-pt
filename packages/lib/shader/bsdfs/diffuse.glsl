@@ -5,7 +5,7 @@ float ggx_directional_albedo_ms(float theta, vec2 alpha, float e0) {
 }
 
 float ggx_average_albedo_ms(vec2 alpha, float e0) {
-  return e0 + (-0.33263 * alpha.x * alpha.y - 0.072359) * (1.0 - e0) * e0;
+  return e0 - (0.33263 * alpha.x * alpha.y + 0.072359) * (1.0 - e0) * e0;
 }
 
 float coupled_diffuse(vec2 alpha, float dot_wi_n, float dot_wo_n, float e0) {
@@ -27,7 +27,6 @@ vec3 diffuse_bsdf_eval(const in MaterialClosure c, vec3 wi, vec3 wo, Geometry g)
     float coupled = coupled_diffuse(c.alpha, abs(dot(wi, g.n)), abs(dot(wo, g.n)), max_(c.f0 * c.specular_tint));
     bsdf_weight = c.albedo * mix(ONE_OVER_PI, coupled, c.specular);
  } else { // diffuse transmission
-   vec3 transmission_color = c.translucencyColor ;
    bsdf_weight =  c.translucency * c.translucencyColor * ONE_OVER_PI;
  }
 

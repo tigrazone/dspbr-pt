@@ -37,18 +37,17 @@ float IorToFresnel0(float transmittedIor, float incidentIor) {
 // Fresnel equations for dielectric/dielectric interfaces.
 // Ref: https://belcour.github.io/blog/research/2017/05/01/brdf-thin-film.html
 // Evaluation XYZ sensitivity curves in Fourier space
-vec3 evalSensitivity(float OPD, vec3 shift) {
-    float phase = TWO_PI * OPD * 1.0e-9;
+vec3 evalSensitivity(float phase, vec3 shift) {
     vec3 val = vec3(5.4856e-13, 4.4201e-13, 5.2481e-13);
     vec3 pos = vec3(1.6810e+06, 1.7953e+06, 2.2084e+06);
     vec3 var = vec3(4.3278e+09, 9.3046e+09, 6.6121e+09);
 
     vec3 xyz = val * sqrt(TWO_PI * var) * cos(pos * phase + shift) * exp(-sq(phase) * var);
-    xyz.x += 9.7470e-14 * sqrt(TWO_PI * 4.5282e+09) * cos(2.2399e+06 * phase + shift[0]) * exp(-4.5282e+09 * sq(phase));
+    xyz.x += 1.6440828550896443750697033567757e-8 * cos(2.2399e+06 * phase + shift[0]) * exp(-4.5282e+09 * sq(phase));
     xyz /= 1.0685e-7;
 
     vec3 srgb = XYZ_TO_REC709 * xyz;
-    return srgb;
+    return srgb + srgb;
 }
 
 vec3 evalIridescence(float outsideIOR, float eta2, float cosTheta1, float thinFilmThickness, vec3 baseF0)
@@ -87,7 +86,8 @@ vec3 evalIridescence(float outsideIOR, float eta2, float cosTheta1, float thinFi
     if (baseIOR[2] < iridescenceIOR) phi23[2] = PI;
 
     // Phase shift
-    float OPD = 2.0 * iridescenceIOR * thinFilmThickness * cosTheta2;
+    float OPD0 = 1.2566370614359172953850573533118e-8 * iridescenceIOR * thinFilmThickness * cosTheta2;
+    float OPD = OPD0;
     vec3 phi = vec3(phi21) + phi23;
 
     // Compound terms
@@ -104,8 +104,9 @@ vec3 evalIridescence(float outsideIOR, float eta2, float cosTheta1, float thinFi
     for (int m = 1; m <= 2; ++m)
     {
         Cm *= r123;
-        vec3 Sm = 2.0 * evalSensitivity(float(m) * OPD, float(m) * phi);
+        vec3 Sm = evalSensitivity(OPD, float(m) * phi);
         I += Cm * Sm;
+        OPD += OPD0;
     }
 
     // Since out of gamut colors might be produced, negative color values are clamped to 0.

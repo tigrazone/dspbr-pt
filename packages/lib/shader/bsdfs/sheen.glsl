@@ -15,8 +15,7 @@ float lambda_sheen(float cos_theta, float alpha) {
 
 float directional_albedo_sheen(float cos_theta, float alpha) {
   float c = 1.0 - cos_theta;
-  float c3 = c * c * c;
-  return 0.65584461 * c3 + 1.0 / (4.16526551 + exp(-7.97291361 * sqrt(alpha) + 6.33516894));
+  return 0.65584461 * c * c * c + 1.0 / (4.16526551 + exp(-7.97291361 * sqrt(alpha) + 6.33516894));
 }
 
 // Michael Ashikhmin, Simon Premoze – “Distribution-based BRDFs”, 2007

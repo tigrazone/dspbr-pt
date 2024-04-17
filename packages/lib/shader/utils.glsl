@@ -155,10 +155,8 @@ vec3 fromThetaPhi(float theta, float phi) {
 
 vec2 dir_to_uv(vec3 dir, out float pdf) {
   float theta = computeTheta(dir);
-  float u = computePhi(dir) * ONE_OVER_TWO_PI;
-  float v = theta * ONE_OVER_PI;
   pdf = 1.0 / (TWO_PI * PI * max(EPS_COS, sin(theta)));
-  return vec2(u, v);
+  return vec2(computePhi(dir) * 0.5f, theta) * ONE_OVER_PI;
 }
 
 vec3 uv_to_dir(vec2 uv, out float pdf) {
@@ -173,7 +171,7 @@ vec3 sampleHemisphereCosine(vec2 uv, out float pdf) {
   float cosTheta = sqrt(1.0 - uv.x);
   float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
   pdf = cosTheta * ONE_OVER_PI;
-  return vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+  return vec3(vec2(cos(phi), sin(phi)) * sinTheta, cosTheta);
 }
 
 vec3 sampleHemisphereUniform(vec2 uv, out float pdf) {
@@ -181,7 +179,7 @@ vec3 sampleHemisphereUniform(vec2 uv, out float pdf) {
   float cosTheta = 1.0 - uv.x;
   float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
   pdf = ONE_OVER_TWO_PI;
-  return vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+  return vec3(vec2(cos(phi), sin(phi)) * sinTheta, cosTheta);
   }
 
 vec3 compute_triangle_normal(in vec3 p0, in vec3 p1, in vec3 p2) {
