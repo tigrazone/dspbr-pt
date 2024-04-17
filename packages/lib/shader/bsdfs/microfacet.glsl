@@ -5,10 +5,8 @@
 // Roughness projected onto the outgoing direction - eq. 80
 float projected_roughness(vec2 alpha, vec3 w, Geometry g) {
   float sin_theta_2 = 1.0 - sqr(dot(w, g.n));
-  float cos_phi_2 = sqr(dot(w, g.t));
-  float sin_phi_2 = sqr(dot(w, g.b));
 
-  return sqrt((cos_phi_2 * sqr(alpha.x) + sin_phi_2 * sqr(alpha.y)) / sin_theta_2);
+  return sqrt((sqr(alpha.x * dot(w, g.t)) + sqr(alpha.y * dot(w, g.b))) / sin_theta_2);
 }
 
 // eq. 86
@@ -60,19 +58,17 @@ float ggx_eval(vec2 alpha, vec3 wh, Geometry g) {
 
   float cos_theta_2 = sqr(cos_theta);
   float cos_theta_4 = sqr(cos_theta_2);
-  float sin_theta_2 = 1.0 - cos_theta_2;
-  float tan_theta_2 = sqr(sqrt(sin_theta_2) / cos_theta);
 
-  if (sin_theta_2 < EPS) {
+  if (1.0 - cos_theta_2 < EPS) {
     // avoid 0 * inf
     return 1.0 / (PI * alpha.x * alpha.y * cos_theta_4);
   }
 
-  float cos_phi_2 = sqr(dot(wh, g.t));
-  float sin_phi_2 = sqr(dot(wh, g.b));
+  float sin_theta_2 = 1.0 - cos_theta_2;
+  float tan_theta_2 = sqr(sqrt(sin_theta_2) / cos_theta);
 
   return 1.0 / (PI * alpha.x * alpha.y * cos_theta_4 *
-                sqr(1.0 + tan_theta_2 * (cos_phi_2 / sqr(alpha.x) + sin_phi_2 / sqr(alpha.y)) / sin_theta_2));
+                sqr(1.0 + tan_theta_2 * (sqr(dot(wh, g.t) / alpha.x) + sqr(dot(wh, g.b) / alpha.y)) / sin_theta_2));
 }
 
 // GGX distribution of visible normals, eq. 16
