@@ -1,10 +1,4 @@
-vec3 fresnel_schlick(vec3 f0, vec3 f90, float theta) {
-  return f0 + (f90 - f0) * pow5(abs(1.0 - theta));
-}
-
-float fresnel_schlick(float f0, float f90, float theta) {
-  return f0 + (f90 - f0) * pow5(abs(1.0 - theta));
-}
+#define fresnel_schlick(f0, f90, theta) ( (f0) + ((f90) - (f0)) * pow5(abs(1.0 - (theta))) )
 
 vec3 fresnel_schlick_dielectric(float cos_theta, vec3 f0, vec3 f90, float ni, float nt, bool thin_walled) {
   if (ni > nt && !thin_walled) {

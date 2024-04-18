@@ -25,13 +25,7 @@ float ggx_smith_lambda(vec2 alpha, vec3 w, Geometry g) {
 }
 
 // Generalized form of the Smith masking function eq. 43
-float ggx_smith_g1(vec2 alpha, vec3 w, vec3 wh, Geometry g) {
-  // if (dot(w, wh) < 0.0) {
-  //   return 0.0;
-  // }
-
-  return 1.0 / (1.0 + ggx_smith_lambda(alpha, w, g));
-}
+#define ggx_smith_g1(alpha, w, wh, g) ( 1.0 / (1.0 + ggx_smith_lambda((alpha), (w), (g))) )
 
 // Height-Correlated Masking and Shadowing - eq. 99
 float ggx_smith_g2(vec2 alpha, vec3 wi, vec3 wo, vec3 wh, Geometry g, bool transmit) {
@@ -105,13 +99,9 @@ float directional_albedo_ggx(float alpha, float cosTheta) {
              (3.09507 + cosTheta * (-9.11368 + cosTheta * (15.88844 + cosTheta * (-13.70343 + 4.51786 * cosTheta))));
 }
 
-float average_albedo_ggx(float alpha) {
-  return 1.0 + alpha * (-0.11304 + alpha * (-1.86947 + (2.22682 - 0.83397 * alpha) * alpha));
-}
+#define average_albedo_ggx(alpha) ( 1.0 + (alpha) * (-0.11304 + (alpha) * (-1.86947 + (2.22682 - 0.83397 * (alpha)) * (alpha))) )
 
-vec3 average_fresnel(vec3 f0, vec3 f90) {
-  return 0.95238095238095238095238095238095 * f0 + 0.04761904761904761904761904761905 * f90;
-}
+#define average_fresnel(f0, f90) ( 0.95238095238095238095238095238095 * (f0) + 0.04761904761904761904761904761905 * (f90) )
 
 vec3 eval_brdf_microfacet_ggx_ms(vec3 f0, vec3 f90, vec2 alpha_uv, vec3 wi, vec3 wo, Geometry g) {
   float alpha = sqrt(alpha_uv.x * alpha_uv.y);
@@ -180,10 +170,7 @@ vec3 fresnel_reflection(MaterialClosure c, float cos_theta, float ni, float nt) 
   return mix(mix(_plastic, _glass, c.transparency), _iridescence, c.iridescence);
 }
 
-vec3 fresnel_transmission(MaterialClosure c, float cos_theta, float ni, float nt) {
-  vec3 fr = fresnel_schlick_dielectric(cos_theta, c.specular_f0, c.specular_f90, ni, nt, c.thin_walled);
-  return vec3(1.0) - fr;
-}
+#define fresnel_transmission(c, cos_theta, ni, nt) ( vec3(1.0) - fresnel_schlick_dielectric((cos_theta), (c).specular_f0, (c).specular_f90, (ni), (nt), (c).thin_walled) )
 
 vec3 sample_bsdf_microfacet_ggx_smith(const in MaterialClosure c, vec3 wi, Geometry geo, vec3 uvw, out float pdf,
                                       inout vec3 bsdf_weight, inout int event) {
