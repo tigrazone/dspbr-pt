@@ -7,7 +7,8 @@ uniform sampler2D tex;
 uniform float exposure;
 uniform bool gamma;
 uniform int tonemappingMode;
-const vec3 whitePoint = vec3(1.0);
+
+#define whitePoint vec3(1.0)
 
 in vec2 v_uv;
 out vec4 out_FragColor;
@@ -19,9 +20,7 @@ out vec4 out_FragColor;
 #define vec3ONE_OVER_2_2 vec3(0.45454545454545454545454545454545)
 
 // exposure only
-vec3 LinearToneMapping(vec3 color) {
-  return exposure * color;
-}
+#define LinearToneMapping(color) ( (exposure) * (color) )
 
 vec3 ReinhardToneMapping(vec3 color) {
   color *= exposure;
@@ -34,7 +33,7 @@ vec3 ReinhardToneMapping(vec3 color) {
 vec3 Uncharted2ToneMapping(vec3 color) {
   // John Hable's filmic operator from Uncharted 2 video game
   color *= exposure;
-  return saturate(Uncharted2Helper(color) / Uncharted2Helper(vec3(whitePoint)));
+  return saturate(Uncharted2Helper(color) / Uncharted2Helper(whitePoint));
 }
 
 vec3 OptimizedCineonToneMapping(vec3 color) {

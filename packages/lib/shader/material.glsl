@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-const int E_DIFFUSE = 0x00001;
-const int E_DELTA = 0x00002;
-const int E_REFLECTION = 0x00004;
-const int E_TRANSMISSION = 0x00008;
-const int E_COATING = 0x00010;
-const int E_STRAIGHT = 0x00020;
-const int E_OPAQUE_DIELECTRIC = 0x00040;
-const int E_TRANSPARENT_DIELECTRIC = 0x00080;
-const int E_METAL = 0x00100;
+#define E_DIFFUSE					0x00001
+#define E_DELTA						0x00002
+#define E_REFLECTION				0x00004
+#define E_TRANSMISSION				0x00008
+#define E_COATING					0x00010
+#define E_STRAIGHT					0x00020
+#define E_OPAQUE_DIELECTRIC			0x00040
+#define E_TRANSPARENT_DIELECTRIC	0x00080
+#define E_METAL						0x00100
 
 // Convert from roughness and anisotropy to 2d anisotropy.
 vec2 roughness_conversion(float roughness, float anisotropy) {
