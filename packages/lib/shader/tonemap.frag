@@ -41,7 +41,7 @@ vec3 OptimizedCineonToneMapping(vec3 color) {
   // optimized filmic operator by Jim Hejl and Richard Burgess-Dawson
   color *= exposure;
   color = max(vec3(0.0), color - 0.004);
-  return to_linear_rgb((color * (6.2 * color + 0.5)) / (color * (6.2 * color + 1.7) + 0.06));
+  return pow((color * (6.2 * color + 0.5)) / (color * (6.2 * color + 1.7) + 0.06), vec3(2.2));
 }
 
 // vec3 ACESFilmicToneMapping(vec3 color) {
