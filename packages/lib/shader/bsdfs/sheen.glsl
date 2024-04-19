@@ -1,9 +1,9 @@
 
 #define ll(x) ( a / (1.0 + b * pow(abs((x)), c)) + d * (x) + e )
 
-float directional_albedo_sheen(float cos_theta, float alpha) {
+float directional_albedo_sheen(float cos_theta, float alpha_) {
   float c = 1.0 - cos_theta;
-  return 0.65584461 * c * c * c + 1.0 / (4.16526551 + exp(-7.97291361 * sqrt(alpha) + 6.33516894));
+  return 0.65584461 * c * c * c + 1.0 / (4.16526551 + exp(-7.97291361 * alpha_ + 6.33516894));
 }
 
 // Michael Ashikhmin, Simon Premoze – “Distribution-based BRDFs”, 2007
@@ -37,8 +37,8 @@ vec3 sheen_layer(out float base_weight, vec3 sheen_color, float sheen_roughness,
   // We clamp the roughness to range[0.07; 1] to avoid numerical issues and
   // because we observed that the directional albedo at grazing angles becomes
   // larger than 1 if roughness is below 0.07
-  float alpha = max(sheen_roughness, 0.07);
-  alpha = alpha*alpha;
+  float alpha_ = max(sheen_roughness, 0.07);
+  float alpha = alpha_ * alpha_;
   float inv_alpha = 1.0 / alpha;
 
   float cos_theta_i = saturate_cos(dot(wi, g.n));
@@ -56,8 +56,8 @@ vec3 sheen_layer(out float base_weight, vec3 sheen_color, float sheen_roughness,
 
   float sheen = G * D / (4.0 * cos_theta_i * cos_theta_o);
 
-  float Ewi = max_(sheen_color) * directional_albedo_sheen(cos_theta_i, alpha);
-  float Ewo = max_(sheen_color) * directional_albedo_sheen(cos_theta_o, alpha);
+  float Ewi = max_(sheen_color) * directional_albedo_sheen(cos_theta_i, alpha_);
+  float Ewo = max_(sheen_color) * directional_albedo_sheen(cos_theta_o, alpha_);
 
   base_weight = min(1.0 - Ewi, 1.0 - Ewo);
 
