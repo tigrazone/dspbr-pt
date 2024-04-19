@@ -50,8 +50,8 @@ float ggx_eval(vec2 alpha, vec3 wh, Geometry g) {
     return 0.0;
   }
 
-  float cos_theta_2 = sqr(cos_theta);
-  float cos_theta_4 = sqr(cos_theta_2);
+  float cos_theta_2 = cos_theta * cos_theta;
+  float cos_theta_4 = cos_theta_2 * cos_theta_2;
 
   if (1.0 - cos_theta_2 < EPS) {
     // avoid 0 * inf
@@ -59,7 +59,7 @@ float ggx_eval(vec2 alpha, vec3 wh, Geometry g) {
   }
 
   float sin_theta_2 = 1.0 - cos_theta_2;
-  float tan_theta_2 = sqr(sqrt(sin_theta_2) / cos_theta);
+  float tan_theta_2 = sin_theta_2 / cos_theta_2;
 
   return 1.0 / (PI * alpha.x * alpha.y * cos_theta_4 *
                 sqr(1.0 + tan_theta_2 * (sqr(dot(wh, g.t) / alpha.x) + sqr(dot(wh, g.b) / alpha.y)) / sin_theta_2));
@@ -245,9 +245,9 @@ vec3 sample_bsdf_microfacet_ggx_smith(const in MaterialClosure c, vec3 wi, Geome
     if (c.thin_walled) {
       pdf *= 1.0 / (4.0 * abs(dot(wo, wh)));
     } else {
-      bsdf_weight *= sqr(ior_i / ior_o); // non symmetric adjoint brdf correction factor
+      bsdf_weight *= ior_i * ior_i / (ior_o * ior_o); // non symmetric adjoint brdf correction factor
       float denom = sqr(ior_i * dot(wi, wh) + ior_o * dot(wo, wh));
-      pdf *= sqr(ior_o) * abs(dot(wo, wh)) / denom;
+      pdf *= ior_o * ior_o * abs(dot(wo, wh)) / denom;
     }
   }
 
@@ -280,7 +280,7 @@ float bsdf_microfacet_ggx_smith_pdf(in MaterialClosure c, Geometry g, vec3 wi, v
     pdf *= 1.0 / (4.0 * abs(cos_theta_i));
   } else {
     float denom = sqr(ior_i * dot(wi, wh) + ior_o * dot(wo, wh));
-    pdf *= sqr(ior_o) * abs(dot(wo, wh)) / denom;
+    pdf *= ior_o * ior_o * abs(dot(wo, wh)) / denom;
   }
 
   if (dot(wi, g.n) < EPS_COS)

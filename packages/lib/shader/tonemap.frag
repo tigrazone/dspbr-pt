@@ -28,7 +28,7 @@ vec3 ReinhardToneMapping(vec3 color) {
 }
 
 #define Uncharted2Helper(x)                                                                                            \
-  max(((x * (0.15 * x + 0.10 * 0.50) + 0.20 * 0.02) / (x * (0.15 * x + 0.50) + 0.20 * 0.30)) - 0.02 / 0.30, vec3(0.0))
+  max(((x * (0.15 * x + 0.05) + 0.004) / (x * (0.15 * x + 0.50) + 0.06)) - 0.06666666666666666666666666666667, vec3(0.0))
 
 vec3 Uncharted2ToneMapping(vec3 color) {
   // John Hable's filmic operator from Uncharted 2 video game

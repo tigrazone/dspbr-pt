@@ -3,7 +3,7 @@
 vec3 fresnel_schlick_dielectric(float cos_theta, vec3 f0, vec3 f90, float ni, float nt, bool thin_walled) {
   if (ni > nt && !thin_walled) {
     float inv_eta = ni / nt;
-    float sin_theta2 = sqr(inv_eta) * (1.0 - sqr(cos_theta));
+    float sin_theta2 = inv_eta * inv_eta * (1.0 - cos_theta * cos_theta);
     if (sin_theta2 >= 1.0) {
       return vec3(1.0); // TIR
     }

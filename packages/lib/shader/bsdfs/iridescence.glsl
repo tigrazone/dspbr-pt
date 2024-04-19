@@ -42,8 +42,8 @@ vec3 evalSensitivity(float phase, vec3 shift) {
     vec3 pos = vec3(1.6810e+06, 1.7953e+06, 2.2084e+06);
     vec3 var = vec3(4.3278e+09, 9.3046e+09, 6.6121e+09);
 
-    vec3 xyz = val * sqrt(TWO_PI * var) * cos(pos * phase + shift) * exp(-sq(phase) * var);
-    xyz.x += 1.6440828550896443750697033567757e-8 * cos(2.2399e+06 * phase + shift[0]) * exp(-4.5282e+09 * sq(phase));
+    vec3 xyz = val * sqrt(TWO_PI * var) * cos(pos * phase + shift) * exp(-phase * phase * var);
+    xyz.x += 1.6440828550896443750697033567757e-8 * cos(2.2399e+06 * phase + shift[0]) * exp(-4.5282e+09 * phase * phase);
     xyz /= 1.0685e-7;
 
     vec3 srgb = XYZ_TO_REC709 * xyz;
@@ -57,7 +57,7 @@ vec3 evalIridescence(float outsideIOR, float eta2, float cosTheta1, float thinFi
     // Force iridescenceIOR -> outsideIOR when thinFilmThickness -> 0.0
     float iridescenceIOR = mix(outsideIOR, eta2, smoothstep(0.0, 0.03, thinFilmThickness));
     // Evaluate the cosTheta on the base layer (Snell law)
-    float sinTheta2Sq = sq(outsideIOR / iridescenceIOR) * (1.0 - sq(cosTheta1));
+    float sinTheta2Sq = sq(outsideIOR / iridescenceIOR) * (1.0 - cosTheta1 * cosTheta1);
 
     // Handle TIR:
     float cosTheta2Sq = 1.0 - sinTheta2Sq;
@@ -93,7 +93,7 @@ vec3 evalIridescence(float outsideIOR, float eta2, float cosTheta1, float thinFi
     // Compound terms
     vec3 R123 = clamp(R12 * R23, 1e-5, 0.9999);
     vec3 r123 = sqrt(R123);
-    vec3 Rs = sq(T121) * R23 / (vec3(1.0) - R123);
+    vec3 Rs = T121 * T121 * R23 / (vec3(1.0) - R123);
 
     // Reflectance term for m = 0 (DC term amplitude)
     vec3 C0 = R12 + Rs;
