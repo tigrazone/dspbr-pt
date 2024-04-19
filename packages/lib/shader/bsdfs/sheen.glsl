@@ -1,17 +1,5 @@
 
-float l(float x, float alpha) {
-  float oneMinusAlphaSq = (1.0 - alpha) * (1.0 - alpha);
-  float a = mix(21.5473, 25.3245, oneMinusAlphaSq);
-  float b = mix(3.82987, 3.32435, oneMinusAlphaSq);
-  float c = mix(0.19823, 0.16801, oneMinusAlphaSq);
-  float d = mix(-1.97760, -1.27393, oneMinusAlphaSq);
-  float e = mix(-4.32054, -4.85967, oneMinusAlphaSq);
-  return a / (1.0 + b * pow(abs(x), c)) + d * x + e;
-}
-
-float lambda_sheen(float cos_theta, float alpha) {
-  return abs(cos_theta) < 0.5 ? exp(l(cos_theta, alpha)) : exp(2.0 * l(0.5, alpha) - l(1.0 - cos_theta, alpha));
-}
+#define ll(x) ( a / (1.0 + b * pow(abs((x)), c)) + d * (x) + e )
 
 float directional_albedo_sheen(float cos_theta, float alpha) {
   float c = 1.0 - cos_theta;
@@ -27,7 +15,20 @@ float ashikhminV(float alpha, float cos_theta_i, float cos_theta_o) {
 // Sheen BRDF, SIGGRAPH 2017.
 // http://www.aconty.com/pdf/s2017_pbs_imageworks_sheen.pdf
 float charlieV(float alpha, float cos_theta_i, float cos_theta_o) {
-  return 1.0 / (1.0 + lambda_sheen(cos_theta_i, alpha) + lambda_sheen(cos_theta_o, alpha));
+  //prepare variables
+  float oneMinusAlphaSq = (1.0 - alpha) * (1.0 - alpha);
+  float a = mix(21.5473, 25.3245, oneMinusAlphaSq);
+  float b = mix(3.82987, 3.32435, oneMinusAlphaSq);
+  float c = mix(0.19823, 0.16801, oneMinusAlphaSq);
+  float d = mix(-1.97760, -1.27393, oneMinusAlphaSq);
+  float e = mix(-4.32054, -4.85967, oneMinusAlphaSq);
+
+  float l_0_5_2 = ll(0.5);
+  l_0_5_2 += l_0_5_2;
+
+  float lambda_sheen_i = abs(cos_theta_i) < 0.5 ? exp(ll(cos_theta_i)) : exp(l_0_5_2 - ll(1.0 - cos_theta_i));
+  float lambda_sheen_o = abs(cos_theta_o) < 0.5 ? exp(ll(cos_theta_o)) : exp(l_0_5_2 - ll(1.0 - cos_theta_o));
+  return 1.0 / (1.0 + lambda_sheen_i + lambda_sheen_o);
 }
 
 // https://dassaultsystemes-technology.github.io/EnterprisePBRShadingModel/spec-2022x.md.html#components/sheen
