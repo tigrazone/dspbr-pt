@@ -138,7 +138,7 @@ export class PathtracingRenderer {
     this.resetAccumulation();
   }
 
-  public tonemappingModes = ["None", "Reinhard", "Cineon", "AcesFilm"];
+  public tonemappingModes = ["None", "Reinhard", "Cineon", "AcesFilm", "Uncharted2"];
   private _tonemapping: string = "None";
   public get tonemapping() {
     return this._tonemapping;
