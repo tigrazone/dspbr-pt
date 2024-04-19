@@ -51,17 +51,16 @@ float ggx_eval(vec2 alpha, vec3 wh, Geometry g) {
   }
 
   float cos_theta_2 = cos_theta * cos_theta;
-  float cos_theta_4 = cos_theta_2 * cos_theta_2;
 
   if (1.0 - cos_theta_2 < EPS) {
     // avoid 0 * inf
-    return 1.0 / (PI * alpha.x * alpha.y * cos_theta_4);
+    return 1.0 / (PI * alpha.x * alpha.y * cos_theta_2 * cos_theta_2);
   }
 
   float sin_theta_2 = 1.0 - cos_theta_2;
   float tan_theta_2 = sin_theta_2 / cos_theta_2;
 
-  return 1.0 / (PI * alpha.x * alpha.y * cos_theta_4 *
+  return 1.0 / (PI * alpha.x * alpha.y * cos_theta_2 * cos_theta_2 *
                 sqr(1.0 + tan_theta_2 * (sqr(dot(wh, g.t) / alpha.x) + sqr(dot(wh, g.b) / alpha.y)) / sin_theta_2));
 }
 
