@@ -162,10 +162,9 @@ vec3 sample_brdf_microfacet_ggx(vec2 alpha, vec3 wi, Geometry g, vec2 uv, out fl
   return wo;
 }
 
-vec3 fresnel_reflection(MaterialClosure c, float cos_theta, float ni, float nt) {
+vec3 fresnel_reflection(MaterialClosure c, float cos_theta, float ni, float nt, vec3 _glass) {
   vec3 _iridescence = evalIridescence(1.0, c.iridescence_ior, cos_theta, c.iridescence_thickness, c.specular_f0);
   vec3 _plastic = fresnel_schlick(c.specular_f0, c.specular_f90, cos_theta);
-  vec3 _glass = fresnel_schlick_dielectric(cos_theta, c.specular_f0, c.specular_f90, ni, nt, c.thin_walled);
   return mix(mix(_plastic, _glass, c.transparency), _iridescence, c.iridescence);
 }
 
@@ -189,8 +188,8 @@ vec3 sample_bsdf_microfacet_ggx_smith(const in MaterialClosure c, vec3 wi, Geome
     ior_o = 1.0;
   }
 
-  vec3 fr = fresnel_reflection(c, cos_theta_i, ior_i, ior_o);
   vec3 ft = fresnel_transmission(c, cos_theta_i, ior_i, ior_o);
+  vec3 fr = fresnel_reflection(c, cos_theta_i, ior_i, ior_o, - ft + vec3(1.0));
 
   float prob_fr = sum(fr) / (sum(fr) + sum(ft));
   if (isNan(prob_fr)) {
@@ -269,8 +268,8 @@ float bsdf_microfacet_ggx_smith_pdf(in MaterialClosure c, Geometry g, vec3 wi, v
     ior_o = 1.0;
   }
 
-  vec3 fr = fresnel_reflection(c, cos_theta_i, ior_i, ior_o);
   vec3 ft = fresnel_transmission(c, cos_theta_i, ior_i, ior_o);
+  vec3 fr = fresnel_reflection(c, cos_theta_i, ior_i, ior_o, - ft + vec3(1.0));
 
   float prob_fr = sum(fr) / (sum(fr) + sum(ft));
   pdf *= (1.0 - prob_fr);
