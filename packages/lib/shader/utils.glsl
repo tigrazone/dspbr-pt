@@ -114,10 +114,10 @@ vec3 uv_to_dir(vec2 uv, out float pdf) {
 }
 
 vec3 sampleHemisphereCosine(vec2 uv, out float pdf) {
-  float phi = uv.y * TWO_PI;
+  float cosPhi = uv.y + uv.y - 1.0;
   float cosTheta = sqrt(1.0 - uv.x);
   pdf = cosTheta * ONE_OVER_PI;
-  return vec3(vec2(cos(phi), sin(phi)) * sqrt(uv.x), cosTheta);
+  return vec3(vec2(cosPhi, sqrt(1.0 - cosPhi * cosPhi)) * sqrt(uv.x), cosTheta);
 }
 
 #define compute_triangle_normal(p0, p1, p2) ( normalize(cross((p1) - (p0), (p2) - (p0))) )
