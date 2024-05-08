@@ -16,12 +16,17 @@ float ggx_smith_lambda(vec2 alpha, vec3 w, Geometry g) {
   if (sin_theta_2 < EPS) {
     return 0.0;
   }
-
+/*
   float alpha_w = projected_roughness(alpha, w, g);
 
   float tan_theta = sqrt(sin_theta_2) / abs(dot(w, g.n));
 
   return 0.5 * (sqrt(1.0 + alpha_w * tan_theta * alpha_w * tan_theta) - 1.0);
+  */
+
+  float alpha_w2tan_tan_theta2 = (sqr(alpha.x * dot(w, g.t)) + sqr(alpha.y * dot(w, g.b)))  / (1.0 - sin_theta_2);
+
+  return 0.5 * (sqrt(1.0 + alpha_w2tan_tan_theta2) - 1.0);
 }
 
 // Generalized form of the Smith masking function eq. 43
