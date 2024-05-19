@@ -1,16 +1,20 @@
 
+/*
 float ggx_directional_albedo_ms(float theta, vec2 alpha, float e0) {
   return mix(e0 + (1.0 - e0) * pow5(abs(1.0 - theta)), 0.04762 + 0.95238 * e0,
              1.0 - pow5(abs(1.0 - alpha.x * alpha.y)));
 }
+*/
 
 float ggx_average_albedo_ms(vec2 alpha, float e0) {
   return e0 - (0.33263 * alpha.x * alpha.y + 0.072359) * (1.0 - e0) * e0;
 }
 
 float coupled_diffuse(vec2 alpha, float dot_wi_n, float dot_wo_n, float e0) {
-  float Ewi = ggx_directional_albedo_ms(dot_wi_n, alpha, e0);
-  float Ewo = ggx_directional_albedo_ms(dot_wo_n, alpha, e0);
+  float e01 = 0.04762 + 0.95238 * e0;
+  float pow51 = 1.0 - pow5(abs(1.0 - alpha.x * alpha.y));
+  float Ewi = mix(e0 + (1.0 - e0) * pow5(abs(1.0 - dot_wi_n)), e01, pow51);
+  float Ewo = mix(e0 + (1.0 - e0) * pow5(abs(1.0 - dot_wo_n)), e01, pow51);
   float Eavg = ggx_average_albedo_ms(alpha, e0);
   return (1.0 - Ewo) * (1.0 - Ewi) / (PI * (1.0 - Eavg));
 }
@@ -24,8 +28,12 @@ vec3 diffuse_bsdf_eval(const in MaterialClosure c, vec3 wi, vec3 wo, Geometry g)
 
   bool transmit = dot(wo, g.n) < 0.0;
   if(!transmit) { // diffuse reflection
-    float coupled = coupled_diffuse(c.alpha, abs(dot(wi, g.n)), abs(dot(wo, g.n)), max_(c.f0 * c.specular_tint));
-    bsdf_weight = c.albedo * mix(ONE_OVER_PI, coupled, c.specular);
+	if(c.specular > 0.0) {
+		float coupled = coupled_diffuse(c.alpha, abs(dot(wi, g.n)), abs(dot(wo, g.n)), max_(c.f0 * c.specular_tint));
+		bsdf_weight = coupled > 0.F ?
+					  c.albedo * mix(ONE_OVER_PI, coupled, c.specular) :
+					  c.albedo * ONE_OVER_PI;
+	} else bsdf_weight = c.albedo * ONE_OVER_PI;
  } else { // diffuse transmission
    bsdf_weight =  c.translucency * c.translucencyColor * ONE_OVER_PI;
  }
