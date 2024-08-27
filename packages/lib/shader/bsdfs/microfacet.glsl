@@ -83,15 +83,16 @@ float ggx_eval_vndf(vec2 alpha, vec3 wi, vec3 wh, Geometry g) {
 vec3 ggx_sample_vndf(vec2 alpha, vec3 wi_, vec2 uv) {
   vec3 wi = normalize(vec3(wi_.xy * alpha, wi_.z));
   // Sample a spherical cap
-  float phi = TWO_PI * uv.x;
-  float a = saturate(min(alpha.x, alpha.y)); // Eq. 6
-  float s = 1.0f + length(wi_.xy); // Omit sgn for a <=1
-  float a2 = a * a; float s2 = s * s;
-  float k = (1.0f - a2) * s2 / (s2 + a2 * wi_.z * wi_.z); // Eq. 5
-  float b = wi_.z > 0.f ? k * wi.z : wi.z;
-  float z = (1.0f - uv.y) * (1.0f + b) -b;
-  float sinTheta = sqrt(saturate(1.0f - z * z));
-  vec3 o_std = vec3(sinTheta * cos(phi), sinTheta * sin(phi), z);
+  float b = wi.z;
+  if(wi_.z > 0.f) {
+	  float a = saturate(min(alpha.x, alpha.y)); // Eq. 6
+	  float awiz_s = a * wi_.z / (1.0f + length(wi_.xy));
+	  b *= ((1.0f - a * a) / (1.0f + awiz_s * awiz_s));
+  }
+
+  float z = (1.0f - uv.y) * (1.0f + b) - b;
+  float phi  = M_TWO_PI * uv.x;
+  vec3 o_std = vec3(sqrt(saturate(1.0f - z * z)) * vec2(cos(phi), sin(phi)), z);
   // Compute the microfacet normal m
   vec3 m_std = wi + o_std;
   return normalize(vec3(m_std.xy * alpha, m_std.z));
